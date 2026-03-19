@@ -118,12 +118,7 @@ def download_video():
         })
     else:
         opts.update({
-            'format': (
-                f'bestvideo[height<={quality}][ext=mp4]+bestaudio[ext=m4a]'
-                f'/bestvideo[height<={quality}]+bestaudio'
-                f'/best[height<={quality}]'
-                f'/best'
-            ),
+            'format': f'bestvideo[height<={quality}]+bestaudio/best',
             'outtmpl': output_template,
             'merge_output_format': 'mp4',
         })
