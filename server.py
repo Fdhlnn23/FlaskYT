@@ -173,4 +173,5 @@ if __name__ == '__main__':
         print("  ⚠ Tidak ada cookies!")
         print("  Jalankan: python server.py --cookies cookies.txt")
     print("=" * 50)
-    app.run(debug=False, host='0.0.0.0', port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=False, host='0.0.0.0', port=port)
