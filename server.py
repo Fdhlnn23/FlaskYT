@@ -29,23 +29,17 @@ while i < len(args):
 
 
 def get_base_opts():
-    import shutil
-
-    node_path = shutil.which('node')
-    ffmpeg_path = shutil.which('ffmpeg')
-
     opts = {
         'quiet': True,
         'no_warnings': True,
-        'ffmpeg_location': ffmpeg_path or 'ffmpeg',  # ✅ penting buat Railway
-        'remote_components': 'ejs:github',
+
+        # 🔥 penting biar gak ke-detect bot
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0'
+        }
     }
 
-    # ✅ cuma set node kalau ada
-    if node_path:
-        opts['js_runtimes'] = {'node': {'path': node_path}}
-
-    # ✅ cookies tetap jalan
+    # cookies support
     if COOKIES_FROM_BROWSER:
         opts['cookiesfrombrowser'] = (COOKIES_FROM_BROWSER, None, None, None)
     elif COOKIES_FILE and os.path.exists(COOKIES_FILE):
@@ -57,6 +51,7 @@ def get_base_opts():
 @app.route('/')
 def index():
     return send_file('index.html')
+
 
 @app.route('/info')
 def get_info():
@@ -71,6 +66,7 @@ def get_info():
         with yt_dlp.YoutubeDL(opts) as ydl:
             info = ydl.extract_info(url, download=False)
     except Exception as e:
+        print("ERROR INFO:", str(e))  # 🔥 debug log
         return jsonify({'error': str(e)}), 400
 
     formats = info.get('formats', [])
@@ -145,10 +141,10 @@ def download_video():
             if not os.path.exists(filename):
                 return jsonify({'error': 'File tidak ditemukan setelah download'}), 500
 
-            # ✅ INI YANG MISSING — return send_file
             return send_file(filename, as_attachment=True, download_name=os.path.basename(filename))
 
     except Exception as e:
+        print("ERROR DOWNLOAD:", str(e))  # 🔥 debug log
         return jsonify({'error': str(e)}), 400
 
 
@@ -163,7 +159,7 @@ def status():
 
 if __name__ == '__main__':
     print("=" * 50)
-    print("  YTGrab Backend — http://localhost:5000")
+    print("  YTGrab Backend — Railway Ready")
     print("=" * 50)
     if COOKIES_FROM_BROWSER:
         print(f"  Cookies browser : {COOKIES_FROM_BROWSER}")
@@ -171,7 +167,8 @@ if __name__ == '__main__':
         print(f"  Cookies file    : {COOKIES_FILE}")
     else:
         print("  ⚠ Tidak ada cookies!")
-        print("  Jalankan: python server.py --cookies cookies.txt")
     print("=" * 50)
+
+    # 🔥 FIX UTAMA RAILWAY
     port = int(os.environ.get("PORT", 5000))
     app.run(debug=False, host='0.0.0.0', port=port)
