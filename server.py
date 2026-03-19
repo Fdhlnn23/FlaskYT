@@ -31,16 +31,31 @@ while i < len(args):
 def get_base_opts():
     import shutil
 
-    node_path = shutil.which('node') or r'C:\Program Files\nodejs\node.exe'
-    ffmpeg_path = shutil.which('ffmpeg') or r'C:\ffmpeg\bin\ffmpeg.exe'
+    ffmpeg_path = shutil.which('ffmpeg')
 
-    return {
+    opts = {
         'quiet': True,
         'no_warnings': True,
-        'ffmpeg_location': ffmpeg_path,  # 🔥 INI PENTING
-        'remote_components': 'ejs:github',
-        'js_runtimes': {'node': {'path': node_path}},
+        'ffmpeg_location': ffmpeg_path,
+
+        # 🔥 ANTI BLOK YOUTUBE
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0'
+        },
+
+        # 🔥 BIAR LEBIH STABIL
+        'extractor_args': {
+            'youtube': {
+                'player_client': ['android', 'web']
+            }
+        }
     }
+
+    # 🔥 WAJIB BUAT RAILWAY
+    if os.path.exists('cookies.txt'):
+        opts['cookiefile'] = 'cookies.txt'
+
+    return opts
 
 
 @app.route('/')
