@@ -31,29 +31,25 @@ while i < len(args):
 def get_base_opts():
     import shutil
 
+    node_path = shutil.which('node')
     ffmpeg_path = shutil.which('ffmpeg')
 
     opts = {
         'quiet': True,
         'no_warnings': True,
-        'ffmpeg_location': ffmpeg_path,
-
-        # 🔥 ANTI BLOK YOUTUBE
-        'http_headers': {
-            'User-Agent': 'Mozilla/5.0'
-        },
-
-        # 🔥 BIAR LEBIH STABIL
-        'extractor_args': {
-            'youtube': {
-                'player_client': ['android', 'web']
-            }
-        }
+        'ffmpeg_location': ffmpeg_path or 'ffmpeg',  # ✅ penting buat Railway
+        'remote_components': 'ejs:github',
     }
 
-    # 🔥 WAJIB BUAT RAILWAY
-    if os.path.exists('cookies.txt'):
-        opts['cookiefile'] = 'cookies.txt'
+    # ✅ cuma set node kalau ada
+    if node_path:
+        opts['js_runtimes'] = {'node': {'path': node_path}}
+
+    # ✅ cookies tetap jalan
+    if COOKIES_FROM_BROWSER:
+        opts['cookiesfrombrowser'] = (COOKIES_FROM_BROWSER, None, None, None)
+    elif COOKIES_FILE and os.path.exists(COOKIES_FILE):
+        opts['cookiefile'] = COOKIES_FILE
 
     return opts
 
@@ -118,7 +114,12 @@ def download_video():
         })
     else:
         opts.update({
-            'format': f'bestvideo[height<={quality}]+bestaudio/best',
+            'format': (
+                f'bestvideo[height<={quality}][ext=mp4]+bestaudio[ext=m4a]'
+                f'/bestvideo[height<={quality}]+bestaudio'
+                f'/best[height<={quality}]'
+                f'/best'
+            ),
             'outtmpl': output_template,
             'merge_output_format': 'mp4',
         })
